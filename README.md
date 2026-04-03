@@ -29,8 +29,16 @@ It uses the Open Library API to let users browse books, search by keyword, filte
 ## Getting Started
 
 ```bash
+
 npm install
+
+for dev server
 npm run dev
+
+for build
+npm run build
+npm start
+
 ```
 
 ## Project Structure
@@ -69,10 +77,11 @@ The trade-off is that it adds one extra internal hop, but for this project I fel
 - Search input uses a 900ms debounce to reduce noisy requests while typing
 - Infinite scroll uses Intersection Observer with a preload buffer for smoother loading
 - Book covers use next/image, with the main book cover on the detail page loaded eagerly for a better above-the-fold experience, while listing-page covers are left to load normally to avoid over-prioritizing too many images at once.
-- Skipped priority because it is deprecated in Next 16, used loading="eager" on the detail page cover instead because that image is above the fold and should load immediately, while the listing page has many images so.. did not want to over-prioritize all of them.
+- Skipped priority because it is deprecated in Next 16, used loading="eager" on the detail page cover instead because that image is above the fold and should load immediately, while the listing page has many images, so I did not want to over-prioritize all of them.
 - Missing or failed covers fall back to a styled placeholder instead of broken images
 - Skeletons and spinners are used to make loading states feel more polished
 - The search input and language filter both drive the listing query, and their state is synced to the URL. This makes the filtered view shareable, preserves state on refresh, and keeps the search experience aligned with the Open Library data source.
+- Link prefetching for detail navigation: I used Next.js Link prefetching on each book card so the detail route can begin preparing in advance when the link enters the viewport. This helps the transition from listing to book detail feel faster and makes the detail page available sooner after click, especially when combined with the server-side detail caching strategy.
 
 ## Testing
 
@@ -113,6 +122,8 @@ I initially explored a cached/static-style approach, but Open Library’s availa
 
 Trade-off: this gives up build-time prerendering and some caching potential, but it avoids fragile builds caused by an unstable third-party API.
 
+The book detail page is server-rendered through the dynamic route, with metadata generated from the same server-fetched book data. I used (`cache: 'force-cache'` with `revalidate: 300`) here because detail data does not change often, so short-term caching makes navigation faster and reduces repeated calls to Open Library. I also wrapped the detail fetch in React’s cache() so generateMetadata and the page can share the same request instead of fetching the same book twice.
+
 ## Accessibility Audit
 
 I ran an accessibility audit on the homepage and the book detail page using Lighthouse and axe.
@@ -141,3 +152,7 @@ I initially planned to deploy this project on Cloudflare Workers, since that was
 The first blocker was local deployment on Windows, where OpenNext ran into symlink and permission issues. To work around that, I moved the project into a Linux environment through WSL/Ubuntu and retried the deployment from there. That resolved the earlier environment problems, but the final deploy was still blocked by Cloudflare’s free-plan Worker size limit.
 
 At that point, reducing the Worker bundle further felt likely to turn into a separate optimization/debugging task and could have introduced more problems this late in the process. Since paying for a higher Cloudflare plan was not an option, I used Vercel for the final live deployment instead.
+
+## Environment Variables
+
+No environment variables are required for this project at the moment.

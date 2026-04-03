@@ -36,13 +36,25 @@ function buildSearchUrl({ query, page = 1, language }: SearchBooksParams) {
   return `${OPEN_LIBRARY_BASE_URL}/search.json?${params.toString()}`;
 }
 
-async function fetchJson<T>(url: string, retries = 2): Promise<T> {
+type FetchJsonOptions = {
+  retries?: number;
+  cache?: RequestCache;
+  revalidate?: number;
+};
+
+async function fetchJson<T>(
+  url: string,
+  options: FetchJsonOptions = {},
+): Promise<T> {
+  const { retries = 2, cache = 'force-cache', revalidate } = options;
+
   try {
     const response = await fetch(url, {
       headers: {
         Accept: 'application/json',
       },
-      cache: 'no-store',
+      cache,
+      next: revalidate ? { revalidate } : undefined,
     });
 
     if (!response.ok) {
@@ -53,7 +65,7 @@ async function fetchJson<T>(url: string, retries = 2): Promise<T> {
         retries > 0
       ) {
         await wait(800);
-        return fetchJson<T>(url, retries - 1);
+        return fetchJson<T>(url, { ...options, retries: retries - 1 });
       }
 
       throw new Error(`Request failed: ${response.status}`);
@@ -63,7 +75,7 @@ async function fetchJson<T>(url: string, retries = 2): Promise<T> {
   } catch (error) {
     if (retries > 0) {
       await wait(800);
-      return fetchJson<T>(url, retries - 1);
+      return fetchJson<T>(url, { ...options, retries: retries - 1 });
     }
 
     throw error;
@@ -77,6 +89,9 @@ export async function searchBooks(params: SearchBooksParams): Promise<{
 }> {
   const data = await fetchJson<OpenLibrarySearchResponse>(
     buildSearchUrl(params),
+      {
+      cache: 'no-store',
+    },
   );
 
   const books = data.docs.map(mapSearchDocToBookCardItem);
@@ -99,12 +114,20 @@ export async function getBookDetails(
 
   const work = await fetchJson<BookDetailsResponse>(
     `${OPEN_LIBRARY_BASE_URL}${normalizedWorkKey}.json`,
+    {
+      cache: 'force-cache',
+      revalidate: 300,
+    },
   );
 
   const authors = await Promise.all(
     (work.authors ?? []).map(async (entry) => {
       const author = await fetchJson<AuthorDetailsResponse>(
         `${OPEN_LIBRARY_BASE_URL}${entry.author.key}.json`,
+        {
+          cache: 'force-cache',
+          revalidate: 300,
+        },
       );
 
       return {

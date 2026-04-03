@@ -26,7 +26,7 @@ export default function BookCover({
   return (
     <div className="relative h-full w-full overflow-hidden bg-(--card-2)">
       {isLoading && !shouldShowFallback ? (
-        <div className="absolute inset-0 z-10 animate-pulse bg-linear-to-r from-white/2 via-white/5 to-white/2" />
+        <div className="absolute inset-0 z-10 shimmer ease-in-out bg-white/2" />
       ) : null}
 
       {shouldShowFallback ? (

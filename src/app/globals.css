@@ -48,3 +48,20 @@ select {
   width: min(1200px, calc(100% - 2rem));
   margin-inline: auto;
 }
+
+.shimmer {
+  animation: shimmerFade 2.2s ease-in-out infinite;
+  will-change: opacity;
+}
+
+@keyframes shimmerFade {
+  0% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.15;
+  }
+}

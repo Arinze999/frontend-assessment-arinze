@@ -2,19 +2,24 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BookDetailView from '@/features/books/components/BookDetailView';
 import { getBookDetails, getCoverImageUrl } from '@/lib/openlibrary';
+import { cache } from 'react';
 
 type BookDetailPageProps = {
-  params: Promise<{
+  params: {
     workId: string;
-  }>;
+  };
 };
+
+const getCachedBookDetails = cache(async (workId: string) => {
+  return getBookDetails(workId);
+});
 
 export async function generateMetadata(
   props: BookDetailPageProps,
 ): Promise<Metadata> {
   try {
-    const { workId } = await props.params;
-    const book = await getBookDetails(workId);
+    const { workId } = props.params;
+    const book = await getCachedBookDetails(workId);
 
     const description =
       book.description?.slice(0, 160) ||
@@ -47,11 +52,10 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
   let book;
 
   try {
-    book = await getBookDetails(workId);
+    book = await getCachedBookDetails(workId);
   } catch {
     notFound();
   }
-  
 
   return <BookDetailView book={book} />;
 }
