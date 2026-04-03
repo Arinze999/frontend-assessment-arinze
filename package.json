@@ -8,14 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.18.0",
     "isomorphic-dompurify": "^3.7.1",
     "next": "^16.2.2",
     "react": "19.2.4",
@@ -36,7 +31,6 @@
     "jsdom": "^29.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.2",
-    "wrangler": "^4.80.0"
+    "vitest": "^4.1.2"
   }
 }

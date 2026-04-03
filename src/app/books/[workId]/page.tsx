@@ -51,6 +51,7 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
   } catch {
     notFound();
   }
+  
 
   return <BookDetailView book={book} />;
 }

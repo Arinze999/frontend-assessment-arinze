@@ -112,3 +112,32 @@ The listing page is rendered server-side at request time rather than statically 
 I initially explored a cached/static-style approach, but Open Library’s availability was inconsistent during build, which made prerendering unreliable. I switched the listing page to SSR (`dynamic = 'force-dynamic'` with `cache: 'no-store'`) so the app remains stable in production while still satisfying the requirement for a server-rendered listing page.
 
 Trade-off: this gives up build-time prerendering and some caching potential, but it avoids fragile builds caused by an unstable third-party API.
+
+## Accessibility Audit
+
+I ran an accessibility audit on the homepage and the book detail page using Lighthouse and axe.
+
+Results:
+
+- Home page Lighthouse accessibility score: **100**
+- Book detail page Lighthouse accessibility score: **100**
+- axe check: **no issues reported**
+
+What I checked:
+
+- heading structure and semantic layout
+- keyboard access for links, buttons, search, and filters
+- alt text and fallback behavior for book covers
+- error, empty, and loading states
+- visible labels and readable contrast
+
+Notes:
+Lighthouse can only catch part of accessibility issues automatically, so I also did a manual review alongside axe to check the main interaction flow more carefully.
+
+## Deployment Note
+
+I initially planned to deploy this project on Cloudflare Workers, since that was the recommended platform in the assessment. I got the project set up with OpenNext and Wrangler, but ran into a few environment-related issues along the way.
+
+The first blocker was local deployment on Windows, where OpenNext ran into symlink and permission issues. To work around that, I moved the project into a Linux environment through WSL/Ubuntu and retried the deployment from there. That resolved the earlier environment problems, but the final deploy was still blocked by Cloudflare’s free-plan Worker size limit.
+
+At that point, reducing the Worker bundle further felt likely to turn into a separate optimization/debugging task and could have introduced more problems this late in the process. Since paying for a higher Cloudflare plan was not an option, I used Vercel for the final live deployment instead.
