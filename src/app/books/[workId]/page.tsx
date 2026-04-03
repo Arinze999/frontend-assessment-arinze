@@ -5,9 +5,9 @@ import { getBookDetails, getCoverImageUrl } from '@/lib/openlibrary';
 import { cache } from 'react';
 
 type BookDetailPageProps = {
-  params: {
+  params: Promise<{
     workId: string;
-  };
+  }>;
 };
 
 const getCachedBookDetails = cache(async (workId: string) => {
@@ -18,7 +18,7 @@ export async function generateMetadata(
   props: BookDetailPageProps,
 ): Promise<Metadata> {
   try {
-    const { workId } = props.params;
+    const { workId } = await props.params;
     const book = await getCachedBookDetails(workId);
 
     const description =
